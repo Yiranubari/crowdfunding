@@ -6,11 +6,13 @@ declare_id!("7nambqXraRSemsidx7EBqxYQkhepXa3zV6TUvNuWWCuh");
 pub mod crowdfunding {
     use super::*;
 
-    pub fn initialize(ctx: Context<Initialize>) -> Result<()> {
-        msg!("Greetings from: {:?}", ctx.program_id);
+    pub fn create(ctx: Context<Create>, name: String, description: String) => Result<()> {
+        let campaign = &mut ctx.accounts.campaign;
+        campaign.name = name;
+        campaign.description = description;
+        campaign.amount_donated = 0;
+        campaign.admin = ctx.accounts.user.key;
         Ok(())
     }
 }
 
-#[derive(Accounts)]
-pub struct Initialize {}
