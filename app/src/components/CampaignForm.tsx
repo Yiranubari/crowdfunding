@@ -2,6 +2,7 @@ import { useState, type FormEvent } from 'react';
 import { useClient } from '@solana/react';
 import type { TransactionSigner } from '@solana/kit';
 import type { AppClient } from '../client/client';
+import { userFacingError } from '../client/errors';
 
 const NAME_MAX = 32;
 const DESC_MAX = 3000;
@@ -11,11 +12,6 @@ type Status =
   | { kind: 'sending' }
   | { kind: 'done'; signature: string }
   | { kind: 'error'; message: string };
-
-function errorMessage(error: unknown): string {
-  const raw = error instanceof Error ? error.message : String(error);
-  return raw.length > 220 ? `${raw.slice(0, 219)}…` : raw;
-}
 
 export function CampaignForm({
   signer,
@@ -47,7 +43,8 @@ export function CampaignForm({
       setStatus({ kind: 'done', signature: result.context.signature });
       onCreated();
     } catch (error) {
-      setStatus({ kind: 'error', message: errorMessage(error) });
+      console.error('create failed:', error);
+      setStatus({ kind: 'error', message: userFacingError(error) });
     }
   }
 

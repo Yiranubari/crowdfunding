@@ -436,3 +436,37 @@ input:focus-visible {
   text-decoration-thickness: 2px;
   text-underline-offset: 3px;
 }
+
+/* ---------- donate ---------- */
+
+.donate-trigger {
+  width: 100%;
+  margin-top: 4px;
+}
+
+.card__own {
+  display: block;
+  width: 100%;
+  margin-top: 4px;
+  padding: 10px 12px;
+  border: var(--border);
+  box-shadow: var(--shadow-sm);
+  background: var(--paper);
+  text-align: center;
+  font-size: 13px;
+}
+
+.chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 18px;
+}
+
+.donate__done {
+  margin-top: 16px;
+}
+
+.donate__done .form__actions {
+  margin-top: 18px;
+}

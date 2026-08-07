@@ -2,13 +2,12 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useClient } from '@solana/react';
 import {
   WalletReadyGate,
-  useConnect,
   useConnectedWallet,
   useDisconnect,
-  useWallets,
 } from '@solana/kit-plugin-wallet/react';
 import type { AppClient } from '../client/client';
 import { lamportsToSol } from '../client/campaigns';
+import { WalletPickerBody } from './WalletPicker';
 
 function truncate(address: string) {
   return `${address.slice(0, 4)}…${address.slice(-4)}`;
@@ -41,8 +40,7 @@ function Balance({ address }: { address: string }) {
 /** One "Connect wallet" button. Clicking it opens the wallet picker. */
 function ConnectButton() {
   const client = useClient<AppClient>();
-  const wallets = useWallets(client);
-  const { dispatchAsync: connect, isRunning: connecting, error: connectError } = useConnect(client);
+  const connected = useConnectedWallet(client);
   const [open, setOpen] = useState(false);
   const triggerRef = useRef<HTMLButtonElement>(null);
 
@@ -59,6 +57,11 @@ function ConnectButton() {
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, [open, close]);
+
+  // Close the picker as soon as a wallet actually connects.
+  useEffect(() => {
+    if (open && connected) close();
+  }, [open, connected, close]);
 
   return (
     <>
@@ -86,41 +89,7 @@ function ConnectButton() {
                 ×
               </button>
             </div>
-
-            {wallets.length === 0 ? (
-              <p className="muted" style={{ margin: '16px 0 0' }}>
-                No wallet detected. Install Phantom, Solflare, or Backpack, then reload the page.
-              </p>
-            ) : (
-              <div className="wallet-list">
-                {wallets.map((wallet, index) => (
-                  <button
-                    key={wallet.name}
-                    className="wallet-row"
-                    type="button"
-                    autoFocus={index === 0}
-                    disabled={connecting}
-                    onClick={() => {
-                      void connect(wallet).then(close, () => {
-                        // Keep the modal open so the error below is visible.
-                      });
-                    }}
-                  >
-                    <span>{wallet.name}</span>
-                    <span className="wallet-row__arrow" aria-hidden="true">
-                      {connecting ? '…' : '→'}
-                    </span>
-                  </button>
-                ))}
-              </div>
-            )}
-
-            {connecting && <p className="status">Waiting for approval in your wallet…</p>}
-            {connectError && !connecting ? (
-              <p className="status status--err">
-                {connectError instanceof Error ? connectError.message : String(connectError)}
-              </p>
-            ) : null}
+            <WalletPickerBody />
           </div>
         </div>
       )}

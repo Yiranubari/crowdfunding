@@ -36,6 +36,8 @@ export function formatAddress(value: string, head = 4, tail = 4): string {
   return `${value.slice(0, head)}…${value.slice(-tail)}`;
 }
 
+
+
 /**
  * Lists every Campaign account owned by the program, filtered on the account
  * discriminator so unrelated accounts (if any) never reach the decoder.

@@ -3,6 +3,7 @@ import { useClient } from '@solana/react';
 import type { Account, Address } from '@solana/kit';
 import type { AppClient } from '../client/client';
 import { listCampaigns } from '../client/campaigns';
+import { userFacingError } from '../client/errors';
 import type { Campaign } from '../client/generated';
 import { CampaignCard, type Accent } from './CampaignCard';
 
@@ -25,7 +26,8 @@ export function CampaignList({
       setCampaigns(result);
       setError(null);
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : String(cause));
+      console.error('load campaigns failed:', cause);
+      setError(userFacingError(cause));
     }
   }, [client]);
 
@@ -76,6 +78,7 @@ export function CampaignList({
             campaign={campaign}
             accent={ACCENTS[index % ACCENTS.length]}
             isMine={myAddress !== null && campaign.data.admin === myAddress}
+            onDonated={() => void load()}
           />
         ))}
       </div>

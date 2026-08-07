@@ -3,6 +3,7 @@ import { useClient } from '@solana/react';
 import type { Account, TransactionSigner } from '@solana/kit';
 import type { AppClient } from '../client/client';
 import { formatAddress, lamportsToSol } from '../client/campaigns';
+import { userFacingError } from '../client/errors';
 import { findCampaignPda, type Campaign } from '../client/generated';
 import { CampaignForm } from './CampaignForm';
 
@@ -33,7 +34,8 @@ export function CampaignManager({
         setError(null);
       } catch (cause) {
         if (!cancelled) {
-          setError(cause instanceof Error ? cause.message : String(cause));
+          console.error('load your campaign failed:', cause);
+          setError(userFacingError(cause));
         }
       } finally {
         if (!cancelled) setLoading(false);

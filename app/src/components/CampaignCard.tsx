@@ -1,6 +1,7 @@
 import type { Account } from '@solana/kit';
 import type { Campaign } from '../client/generated';
 import { formatAddress, lamportsToSol } from '../client/campaigns';
+import { DonateButton } from './DonateButton';
 
 export type Accent = 'acid' | 'tomato' | 'violet';
 
@@ -8,10 +9,12 @@ export function CampaignCard({
   campaign,
   accent,
   isMine,
+  onDonated,
 }: {
   campaign: Account<Campaign>;
   accent: Accent;
   isMine: boolean;
+  onDonated: () => void;
 }) {
   const { name, description, admin, amountDonated } = campaign.data;
 
@@ -26,6 +29,11 @@ export function CampaignCard({
         </span>
         <span className="mono muted">{formatAddress(admin)}</span>
       </div>
+      {isMine ? (
+        <span className="card__own">This is your campaign</span>
+      ) : (
+        <DonateButton campaign={campaign} onDonated={onDonated} />
+      )}
     </article>
   );
 }
