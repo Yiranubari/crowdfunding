@@ -3,10 +3,6 @@ import { useConnect, useWallets } from '@solana/kit-plugin-wallet/react';
 import type { AppClient } from '../client/client';
 import { userFacingError } from '../client/errors';
 
-/**
- * The discoverable-wallet list + connect flow. Reused by the header's connect
- * button and anywhere a signed action needs a wallet (e.g. the donate modal).
- */
 export function WalletPickerBody() {
   const client = useClient<AppClient>();
   const wallets = useWallets(client);

@@ -37,7 +37,6 @@ function Balance({ address }: { address: string }) {
   return <span className="mono">{sol.toFixed(3)} SOL</span>;
 }
 
-/** One "Connect wallet" button. Clicking it opens the wallet picker. */
 function ConnectButton() {
   const client = useClient<AppClient>();
   const connected = useConnectedWallet(client);
@@ -58,7 +57,6 @@ function ConnectButton() {
     return () => window.removeEventListener('keydown', onKey);
   }, [open, close]);
 
-  // Close the picker as soon as a wallet actually connects.
   useEffect(() => {
     if (open && connected) close();
   }, [open, connected, close]);

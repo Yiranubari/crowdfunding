@@ -24,7 +24,6 @@ body {
   font-family: var(--mono);
   font-size: 15px;
   line-height: 1.5;
-  /* Faint grid so flat blocks have something to sit against */
   background-image:
     linear-gradient(rgba(0, 0, 0, 0.05) 1px, transparent 1px),
     linear-gradient(90deg, rgba(0, 0, 0, 0.05) 1px, transparent 1px);
@@ -41,8 +40,6 @@ h3,
   text-transform: uppercase;
   margin: 0;
 }
-
-/* ---------- layout ---------- */
 
 .bar {
   display: flex;
@@ -72,8 +69,6 @@ h3,
   gap: 12px;
   flex-wrap: wrap;
 }
-
-/* ---------- blocks ---------- */
 
 .panel {
   position: relative;
@@ -113,8 +108,6 @@ h3,
   background: #22c55e;
 }
 
-/* ---------- buttons ---------- */
-
 button {
   font-family: Anton, sans-serif;
   font-size: 16px;
@@ -135,7 +128,6 @@ button:hover:not(:disabled) {
   background: var(--acid);
 }
 
-/* The press: block slides into its own shadow */
 button:active:not(:disabled) {
   transform: translate(4px, 4px);
   box-shadow: 0 0 0 var(--ink);
@@ -171,8 +163,6 @@ input:focus-visible {
   background: var(--ink);
 }
 
-/* ---------- text ---------- */
-
 .mono {
   font-family: var(--mono);
 }
@@ -202,8 +192,6 @@ input:focus-visible {
   background: var(--ink);
   margin: 22px 0;
 }
-
-/* ---------- wallet picker ---------- */
 
 .caret {
   font-size: 12px;
@@ -265,13 +253,41 @@ input:focus-visible {
   opacity: 0.6;
 }
 
-/* ---------- sections ---------- */
+.guard {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 20px;
+  background: var(--tomato);
+  border-bottom: var(--border);
+}
+
+.guard__glyph {
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  background: var(--ink);
+  color: var(--paper);
+  font-family: Anton, sans-serif;
+  font-size: 20px;
+  line-height: 1;
+}
+
+.guard__text {
+  margin: 0;
+  font-size: 14px;
+}
+
+.guard__text strong {
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
 
 .section {
   margin-top: 44px;
 }
-
-/* ---------- cards ---------- */
 
 .grid {
   display: grid;
@@ -350,8 +366,6 @@ input:focus-visible {
   border: 2px solid var(--ink);
 }
 
-/* ---------- form ---------- */
-
 .form {
   margin-top: 18px;
 }
@@ -401,8 +415,6 @@ input:focus-visible {
   flex-wrap: wrap;
 }
 
-/* ---------- status & list toolbar ---------- */
-
 .list__toolbar {
   display: flex;
   align-items: center;
@@ -437,8 +449,6 @@ input:focus-visible {
   text-underline-offset: 3px;
 }
 
-/* ---------- donate ---------- */
-
 .donate-trigger {
   width: 100%;
   margin-top: 4px;
@@ -469,4 +479,28 @@ input:focus-visible {
 
 .donate__done .form__actions {
   margin-top: 18px;
+}
+
+.withdraw {
+  margin-top: 22px;
+  padding-top: 18px;
+  border-top: 2px solid var(--ink);
+}
+
+.withdraw__available {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  font-size: 13px;
+  margin-bottom: 4px;
+}
+
+.withdraw .chip-row {
+  margin-bottom: 14px;
+}
+
+.withdraw .field {
+  margin-bottom: 14px;
 }

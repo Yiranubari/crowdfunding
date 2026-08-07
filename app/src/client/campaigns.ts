@@ -20,6 +20,12 @@ export function lamportsToSol(value: bigint | number): number {
   return Number(value) / LAMPORTS_PER_SOL;
 }
 
+export function lamportsToSolString(value: bigint): string {
+  const whole = value / BigInt(LAMPORTS_PER_SOL);
+  const fraction = (value % BigInt(LAMPORTS_PER_SOL)).toString().padStart(9, '0').replace(/0+$/, '');
+  return fraction ? `${whole}.${fraction}` : whole.toString();
+}
+
 export function solToLamports(value: string | number): bigint {
   const sol = typeof value === 'string' ? Number.parseFloat(value) : value;
   if (!Number.isFinite(sol) || sol <= 0) {
@@ -36,12 +42,6 @@ export function formatAddress(value: string, head = 4, tail = 4): string {
   return `${value.slice(0, head)}…${value.slice(-tail)}`;
 }
 
-
-
-/**
- * Lists every Campaign account owned by the program, filtered on the account
- * discriminator so unrelated accounts (if any) never reach the decoder.
- */
 export async function listCampaigns(
   client: AppClient,
 ): Promise<Array<Account<Campaign>>> {

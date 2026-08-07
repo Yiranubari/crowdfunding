@@ -6,6 +6,7 @@ import { formatAddress, lamportsToSol } from '../client/campaigns';
 import { userFacingError } from '../client/errors';
 import { findCampaignPda, type Campaign } from '../client/generated';
 import { CampaignForm } from './CampaignForm';
+import { WithdrawPanel } from './WithdrawPanel';
 
 export function CampaignManager({
   signer,
@@ -26,7 +27,6 @@ export function CampaignManager({
     setLoading(true);
     void (async () => {
       try {
-        // One campaign per wallet: [b"CAMPAIGN_DEMO", user].
         const [pda] = await findCampaignPda({ user: signer.address });
         const maybe = await client.crowdfunding.accounts.campaign.fetchMaybe(pda);
         if (cancelled) return;
@@ -72,6 +72,7 @@ export function CampaignManager({
           <span className="mono">{lamportsToSol(campaign.data.amountDonated).toFixed(3)} SOL raised</span>
           <span className="mono muted">admin {formatAddress(campaign.data.admin)}</span>
         </div>
+        <WithdrawPanel campaign={campaign} signer={signer} onWithdrawn={onChanged} />
       </div>
     );
   }

@@ -15,9 +15,25 @@ export default function App() {
 
   const signer = connected?.signer ?? null;
 
+  const chains = connected?.account.chains ?? [];
+  const wrongNetwork = chains.length > 0 && !chains.includes('solana:devnet');
+  const networkName =
+    chains.find((chain) => chain.startsWith('solana:')) ?? 'this network';
+
   return (
     <>
       <WalletBar />
+      {wrongNetwork && (
+        <div className="guard" role="alert">
+          <span className="guard__glyph" aria-hidden="true">
+            !
+          </span>
+          <p className="guard__text">
+            Your wallet is on <strong>{networkName.replace('solana:', '')}</strong> — switch it to{' '}
+            <strong>Devnet</strong> to send transactions.
+          </p>
+        </div>
+      )}
       <main className="wrap">
         <h2 className="hero">
           Fund it
