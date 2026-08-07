@@ -13,7 +13,7 @@ function truncate(address: string) {
   return `${address.slice(0, 4)}…${address.slice(-4)}`;
 }
 
-function Balance({ address }: { address: string }) {
+function Balance({ address, pollTick }: { address: string; pollTick: number }) {
   const client = useClient<AppClient>();
   const [sol, setSol] = useState<number | null>(null);
 
@@ -31,7 +31,7 @@ function Balance({ address }: { address: string }) {
     return () => {
       cancelled = true;
     };
-  }, [client, address]);
+  }, [client, address, pollTick]);
 
   if (sol === null) return null;
   return <span className="mono">{sol.toFixed(3)} SOL</span>;
@@ -95,7 +95,7 @@ function ConnectButton() {
   );
 }
 
-function WalletControls() {
+function WalletControls({ pollTick }: { pollTick: number }) {
   const client = useClient<AppClient>();
   const connected = useConnectedWallet(client);
   const { dispatch: disconnect, isRunning: disconnecting } = useDisconnect(client);
@@ -106,7 +106,7 @@ function WalletControls() {
         <span className="chip">
           <span className="chip__dot chip__dot--live" />
           <span className="mono">{truncate(connected.account.address)}</span>
-          <Balance address={connected.account.address} />
+          <Balance address={connected.account.address} pollTick={pollTick} />
         </span>
         <button className="btn--stop" disabled={disconnecting} onClick={() => disconnect()}>
           {disconnecting ? 'Disconnecting…' : 'Disconnect'}
@@ -118,13 +118,13 @@ function WalletControls() {
   return <ConnectButton />;
 }
 
-export function WalletBar() {
+export function WalletBar({ pollTick }: { pollTick: number }) {
   const client = useClient<AppClient>();
   return (
     <header className="bar">
       <h1 className="bar__brand">Fundchain</h1>
       <WalletReadyGate client={client} fallback={<span className="chip">Looking for wallets…</span>}>
-        <WalletControls />
+        <WalletControls pollTick={pollTick} />
       </WalletReadyGate>
     </header>
   );

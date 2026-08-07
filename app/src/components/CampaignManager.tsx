@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useClient } from '@solana/react';
 import type { Account, TransactionSigner } from '@solana/kit';
 import type { AppClient } from '../client/client';
@@ -11,20 +11,22 @@ import { WithdrawPanel } from './WithdrawPanel';
 export function CampaignManager({
   signer,
   refreshKey,
+  pollTick,
   onChanged,
 }: {
   signer: TransactionSigner;
   refreshKey: number;
+  pollTick: number;
   onChanged: () => void;
 }) {
   const client = useClient<AppClient>();
   const [campaign, setCampaign] = useState<Account<Campaign> | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const hasLoaded = useRef(false);
 
   useEffect(() => {
     let cancelled = false;
-    setLoading(true);
     void (async () => {
       try {
         const [pda] = await findCampaignPda({ user: signer.address });
@@ -32,6 +34,7 @@ export function CampaignManager({
         if (cancelled) return;
         setCampaign(maybe.exists ? maybe : null);
         setError(null);
+        hasLoaded.current = true;
       } catch (cause) {
         if (!cancelled) {
           console.error('load your campaign failed:', cause);
@@ -44,7 +47,7 @@ export function CampaignManager({
     return () => {
       cancelled = true;
     };
-  }, [client, signer, refreshKey]);
+  }, [client, signer, refreshKey, pollTick]);
 
   if (loading) {
     return (
@@ -54,7 +57,7 @@ export function CampaignManager({
     );
   }
 
-  if (error) {
+  if (error && !hasLoaded.current) {
     return (
       <div className="panel">
         <span className="muted">Could not read your campaign: {error}</span>
@@ -72,7 +75,7 @@ export function CampaignManager({
           <span className="mono">{lamportsToSol(campaign.data.amountDonated).toFixed(3)} SOL raised</span>
           <span className="mono muted">admin {formatAddress(campaign.data.admin)}</span>
         </div>
-        <WithdrawPanel campaign={campaign} signer={signer} onWithdrawn={onChanged} />
+        <WithdrawPanel campaign={campaign} signer={signer} pollTick={pollTick} onWithdrawn={onChanged} />
       </div>
     );
   }

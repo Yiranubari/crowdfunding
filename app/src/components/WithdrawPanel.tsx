@@ -17,10 +17,12 @@ type Status =
 export function WithdrawPanel({
   campaign,
   signer,
+  pollTick,
   onWithdrawn,
 }: {
   campaign: Account<Campaign>;
   signer: TransactionSigner;
+  pollTick: number;
   onWithdrawn: () => void;
 }) {
   const client = useClient<AppClient>();
@@ -51,7 +53,7 @@ export function WithdrawPanel({
     return () => {
       cancelled = true;
     };
-  }, [client, campaign.address, reloadKey]);
+  }, [client, campaign.address, reloadKey, pollTick]);
 
   const available =
     balance !== null && rent !== null && balance > rent ? balance - rent : 0n;

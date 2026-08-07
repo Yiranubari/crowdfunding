@@ -11,9 +11,11 @@ const ACCENTS: Accent[] = ['acid', 'tomato', 'violet'];
 
 export function CampaignList({
   refreshKey,
+  pollTick,
   myAddress,
 }: {
   refreshKey: number;
+  pollTick: number;
   myAddress: Address | null;
 }) {
   const client = useClient<AppClient>();
@@ -33,17 +35,16 @@ export function CampaignList({
 
   useEffect(() => {
     void load();
-  }, [load, refreshKey]);
-
-  if (error) {
-    return (
-      <div className="panel">
-        <span className="muted">Could not load campaigns: {error}</span>
-      </div>
-    );
-  }
+  }, [load, refreshKey, pollTick]);
 
   if (campaigns === null) {
+    if (error) {
+      return (
+        <div className="panel">
+          <span className="muted">Could not load campaigns: {error}</span>
+        </div>
+      );
+    }
     return (
       <div className="panel">
         <span className="muted">Loading campaigns…</span>

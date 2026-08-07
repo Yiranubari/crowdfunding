@@ -6,12 +6,16 @@ import { toAddress } from './client/campaigns';
 import { WalletBar } from './components/WalletBar';
 import { CampaignManager } from './components/CampaignManager';
 import { CampaignList } from './components/CampaignList';
+import { usePolling } from './hooks/usePolling';
+
+const POLL_INTERVAL_MS = 5000;
 
 export default function App() {
   const client = useClient<AppClient>();
   const connected = useConnectedWallet(client);
   const [refreshKey, setRefreshKey] = useState(0);
   const refresh = useCallback(() => setRefreshKey((key) => key + 1), []);
+  const pollTick = usePolling(POLL_INTERVAL_MS);
 
   const signer = connected?.signer ?? null;
 
@@ -22,7 +26,7 @@ export default function App() {
 
   return (
     <>
-      <WalletBar />
+      <WalletBar pollTick={pollTick} />
       {wrongNetwork && (
         <div className="guard" role="alert">
           <span className="guard__glyph" aria-hidden="true">
@@ -60,7 +64,12 @@ export default function App() {
         ) : (
           <section className="section">
             <span className="label">Step 2 of 4 — your campaign</span>
-            <CampaignManager signer={signer} refreshKey={refreshKey} onChanged={refresh} />
+            <CampaignManager
+              signer={signer}
+              refreshKey={refreshKey}
+              pollTick={pollTick}
+              onChanged={refresh}
+            />
           </section>
         )}
 
@@ -70,6 +79,7 @@ export default function App() {
           </span>
           <CampaignList
             refreshKey={refreshKey}
+            pollTick={pollTick}
             myAddress={connected ? toAddress(connected.account.address) : null}
           />
         </section>
