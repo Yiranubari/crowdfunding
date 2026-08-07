@@ -122,7 +122,7 @@ export function WalletBar({ pollTick }: { pollTick: number }) {
   const client = useClient<AppClient>();
   return (
     <header className="bar">
-      <h1 className="bar__brand">Fundchain</h1>
+      <h1 className="bar__brand">Fundex</h1>
       <WalletReadyGate client={client} fallback={<span className="chip">Looking for wallets…</span>}>
         <WalletControls pollTick={pollTick} />
       </WalletReadyGate>
