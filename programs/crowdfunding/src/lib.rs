@@ -4,7 +4,9 @@ declare_id!("7nambqXraRSemsidx7EBqxYQkhepXa3zV6TUvNuWWCuh");
 
 #[program]
 pub mod crowdfunding {
-    use super::*;
+    use anchor_lang::error::Error::ProgramError;
+
+use super::*;
 
     pub fn create(ctx: Context<Create>, name: String, description: String) -> Result<()> {
         let campaign = &mut ctx.accounts.campaign;
@@ -12,6 +14,21 @@ pub mod crowdfunding {
         campaign.description = description;
         campaign.amount_donated = 0;
         campaign.admin = *ctx.accounts.user.key;
+        Ok(())
+    }
+
+    pub fn withdraw(ctx: Context<Withdraw>, amount: u64) -> Result<()> {
+        let campaign = &mut ctx.accounts.campaign;
+        let user = &mut ctx.accounts.user;
+        if campaign.admin != user.key {
+            return Err(ProgramError::IncorrectProgramId);
+        }
+        let rent_balance = Rent::get()?.minimum_balance(campaign.to_account_info().data_len);
+        if **campaign.to_account_info().lamports.borrow()- rent_balance < amount {
+            return Err(ProgramError::InsufficientFunds);
+        }
+        **campaign.to_account_info().try_borrow_mut_lamports()? -= amount;
+        **user.to_account_info().try_borrow_mut_lamports()? -= amount;
         Ok(())
     }
 }
