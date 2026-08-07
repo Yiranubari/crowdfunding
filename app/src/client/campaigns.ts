@@ -1,4 +1,18 @@
-import { address, type Address } from '@solana/kit';
+import {
+  address,
+  getBase58Decoder,
+  parseBase58RpcAccount,
+  type Account,
+  type Address,
+  type Base58EncodedBytes,
+} from '@solana/kit';
+import type { AppClient } from './client';
+import {
+  CAMPAIGN_DISCRIMINATOR,
+  CROWDFUNDING_PROGRAM_ADDRESS,
+  decodeCampaign,
+  type Campaign,
+} from './generated';
 
 export const LAMPORTS_PER_SOL = 1_000_000_000;
 
@@ -16,4 +30,36 @@ export function solToLamports(value: string | number): bigint {
 
 export function toAddress(value: string): Address {
   return address(value);
+}
+
+export function formatAddress(value: string, head = 4, tail = 4): string {
+  return `${value.slice(0, head)}…${value.slice(-tail)}`;
+}
+
+/**
+ * Lists every Campaign account owned by the program, filtered on the account
+ * discriminator so unrelated accounts (if any) never reach the decoder.
+ */
+export async function listCampaigns(
+  client: AppClient,
+): Promise<Array<Account<Campaign>>> {
+  const accounts = await client.rpc
+    .getProgramAccounts(CROWDFUNDING_PROGRAM_ADDRESS, {
+      encoding: 'base58',
+      filters: [
+        {
+          memcmp: {
+            offset: 0n,
+            encoding: 'base58',
+            bytes: getBase58Decoder().decode(
+              CAMPAIGN_DISCRIMINATOR,
+            ) as Base58EncodedBytes,
+          },
+        },
+      ],
+    })
+    .send();
+  return accounts.map(({ pubkey, account }) =>
+    decodeCampaign(parseBase58RpcAccount(pubkey, account)),
+  );
 }

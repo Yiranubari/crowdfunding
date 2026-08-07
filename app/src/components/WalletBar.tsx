@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useClient } from '@solana/react';
 import {
   WalletReadyGate,
@@ -38,11 +38,99 @@ function Balance({ address }: { address: string }) {
   return <span className="mono">{sol.toFixed(3)} SOL</span>;
 }
 
-function WalletControls() {
+/** One "Connect wallet" button. Clicking it opens the wallet picker. */
+function ConnectButton() {
   const client = useClient<AppClient>();
   const wallets = useWallets(client);
+  const { dispatchAsync: connect, isRunning: connecting, error: connectError } = useConnect(client);
+  const [open, setOpen] = useState(false);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+
+  const close = useCallback(() => {
+    setOpen(false);
+    triggerRef.current?.focus();
+  }, []);
+
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') close();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [open, close]);
+
+  return (
+    <>
+      <button
+        ref={triggerRef}
+        className="btn--go"
+        type="button"
+        onClick={() => setOpen(true)}
+      >
+        Connect wallet <span className="caret mono">▾</span>
+      </button>
+
+      {open && (
+        <div
+          className="modal"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Choose a wallet"
+          onClick={close}
+        >
+          <div className="modal__panel" onClick={(event) => event.stopPropagation()}>
+            <div className="modal__head">
+              <span className="label">Choose a wallet</span>
+              <button className="modal__close" type="button" aria-label="Close" onClick={close}>
+                ×
+              </button>
+            </div>
+
+            {wallets.length === 0 ? (
+              <p className="muted" style={{ margin: '16px 0 0' }}>
+                No wallet detected. Install Phantom, Solflare, or Backpack, then reload the page.
+              </p>
+            ) : (
+              <div className="wallet-list">
+                {wallets.map((wallet, index) => (
+                  <button
+                    key={wallet.name}
+                    className="wallet-row"
+                    type="button"
+                    autoFocus={index === 0}
+                    disabled={connecting}
+                    onClick={() => {
+                      void connect(wallet).then(close, () => {
+                        // Keep the modal open so the error below is visible.
+                      });
+                    }}
+                  >
+                    <span>{wallet.name}</span>
+                    <span className="wallet-row__arrow" aria-hidden="true">
+                      {connecting ? '…' : '→'}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {connecting && <p className="status">Waiting for approval in your wallet…</p>}
+            {connectError && !connecting ? (
+              <p className="status status--err">
+                {connectError instanceof Error ? connectError.message : String(connectError)}
+              </p>
+            ) : null}
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
+
+function WalletControls() {
+  const client = useClient<AppClient>();
   const connected = useConnectedWallet(client);
-  const { dispatch: connect, isRunning: connecting } = useConnect(client);
   const { dispatch: disconnect, isRunning: disconnecting } = useDisconnect(client);
 
   if (connected) {
@@ -60,39 +148,14 @@ function WalletControls() {
     );
   }
 
-  if (wallets.length === 0) {
-    return (
-      <span className="chip">
-        <span className="chip__dot" />
-        No wallet detected — install Phantom, Solflare, or Backpack
-      </span>
-    );
-  }
-
-  return (
-    <div className="stack">
-      {wallets.map((wallet) => (
-        <button
-          key={wallet.name}
-          className="btn--go"
-          disabled={connecting}
-          onClick={() => connect(wallet)}
-        >
-          {connecting ? 'Connecting…' : `Connect ${wallet.name}`}
-        </button>
-      ))}
-    </div>
-  );
+  return <ConnectButton />;
 }
 
 export function WalletBar() {
   const client = useClient<AppClient>();
   return (
     <header className="bar">
-      <h1 className="bar__brand">
-        Fundchain
-        <span className="bar__tag">Devnet</span>
-      </h1>
+      <h1 className="bar__brand">Fundchain</h1>
       <WalletReadyGate client={client} fallback={<span className="chip">Looking for wallets…</span>}>
         <WalletControls />
       </WalletReadyGate>
